@@ -152,7 +152,7 @@ if __name__ == "__main__":
     allLinks = len(links)
     articles = []
     for i, link in enumerate(links):
-        article = Article.download(link, status="{:.3%}".format(i/link))
+        article = Article.download(link, status="{:.3%}".format(i/allLinks))
         if article is not None:
             articles.append(article)
 
