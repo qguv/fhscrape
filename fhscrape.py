@@ -110,18 +110,26 @@ class Article:
         return "<Article: _{}_>".format(self.title)
 
     @classmethod
-    def download(cls, url):
-        soup = soupFromURL(url)
-        title = soup.find("h1").string
-        author = soup.find("a", rel="author").string
-        body = soup.find("div", class_="pure_content").get_text()
+    def download(cls, url, status=None):
+        try:
+            soup = soupFromURL(url)
+            title = soup.find("h1").string
+            author = soup.find("a", rel="author").string
+            body = soup.find("div", class_="pure_content").get_text()
 
-        time = soup.find("span", class_="timestamp")
-        date = time.find_previous_sibling().string
-        time = time.string
+            time = soup.find("span", class_="timestamp")
+            date = time.find_previous_sibling().string
+            time = time.string
 
-        log(title, indent=1)
-        return cls(body, title, author, date, time)
+            if status is not None:
+                log(status, title, indent=1)
+            else:
+                log(title, indent=1)
+
+            return cls(body, title, author, date, time)
+        except:
+            # can't risk all the articles if a single one fails
+            return
 
     def save(self):
         filename = "fh_archive/{}.txt".format(toPosix(self.title))
@@ -140,7 +148,14 @@ if __name__ == "__main__":
         links = linksInMonthArchive(month, year)
     logClear()
     print("Downloading articles...")
-    articles = [ Article.download(link) for link in links ]
+
+    allLinks = len(links)
+    articles = []
+    for i, link in enumerate(links):
+        article = Article.download(link, status="{:.3%}".format(i/link))
+        if article is not None:
+            articles.append(article)
+
     logClear()
     print("Articles downloaded, now saving to disk...")
     makedirs("fh_archive", exist_ok=True)
