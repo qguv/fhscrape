@@ -141,7 +141,7 @@ class Article:
         except Exception as e:
             print("\nWARNING: An article download failed.")
             print("URL:", url)
-            print(e)
+            print("Error:", e)
             print()
             return
 
@@ -160,7 +160,7 @@ class Article:
             print("\nWARNING: An article save failed.")
             print("Title:", self.title)
             print("Date:", self.datetime)
-            print(e)
+            print("Error:", e)
             print()
             return
 
@@ -180,7 +180,7 @@ def interface(year, month, baseDirectory):
 
     linkCount = len(links)
     for i, link in enumerate(links):
-        a = Article.unsafe_download(link) #DEBUG
+        a = Article.download(link)
         a.save(baseDirectory)
         a.log(status="{:.3%}".format(i/linkCount), indent=1)
 
