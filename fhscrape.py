@@ -30,6 +30,9 @@ from bs4 import BeautifulSoup
 # working with files
 from os import makedirs
 
+# corpus article objects
+from articles import FHArticle
+
 # pythonic misc.
 from string import digits, ascii_letters, punctuation
 from datetime import datetime, timezone
@@ -111,65 +114,6 @@ def toPosix(inStr):
 
     return inStr.translate(Del())
 
-class Article:
-    def __init__(self, body: str, title: str, author: str, date: str, time: str):
-        self.body = body
-        self.title = title
-        self.author = author
-        self.datetime = datetime.strptime(date + time, "%B %d, %Y%I:%M %p") 
-
-    def __repr__(self):
-        return "<Article: _{}_>".format(self.title)
-
-    @classmethod
-    def unsafe_download(cls, url):
-        soup = soupFromURL(url)
-        title = soup.find("h1").string
-        author = soup.find("a", rel="author").string
-        body = soup.find("div", class_="pure_content").get_text()
-
-        time = soup.find("span", class_="timestamp")
-        date = soup.find("div", class_="the_date").find_all("p")[1].string
-        time = time.string
-
-        return cls(body, title, author, date, time)
-    
-    @classmethod
-    def download(cls, url):
-        try:
-            return cls.unsafe_download(url)
-        except Exception as e:
-            print("\nWARNING: An article download failed.")
-            print("URL:", url)
-            print("Error:", e)
-            print()
-            return
-
-    def unsafe_save(self, baseDirectory):
-        directory = "{}/{}-{}".format(baseDirectory, self.datetime.year, self.datetime.month)
-        makedirs(directory, exist_ok=True)
-        filename = "{}/{}.txt".format(directory, toPosix(self.title))
-        lines = [self.title, self.author, self.body]
-        with open(filename, 'w') as f:
-            f.writelines((line + '\n' for line in lines))
-
-    def save(self, baseDirectory):
-        try:
-            self.unsafe_save(baseDirectory)
-        except Exception as e:
-            print("\nWARNING: An article save failed.")
-            print("Title:", self.title)
-            print("Date:", self.datetime)
-            print("Error:", e)
-            print()
-            return
-
-    def log(self, status=None, indent=0):
-        if status is None:
-            log(title, indent=indent)
-        else:
-            log(status, self.title, indent=indent)
-
 def interface(year, month, baseDirectory):
     links = linksInArchive(year, month)
     logClear()
@@ -180,7 +124,7 @@ def interface(year, month, baseDirectory):
 
     linkCount = len(links)
     for i, link in enumerate(links):
-        a = Article.download(link)
+        a = FHArticle.download(link)
         a.save(baseDirectory)
         a.log(status="{:.3%}".format(i/linkCount), indent=1)
 
@@ -206,7 +150,7 @@ if __name__ == "__main__":
 
         # default to directory with timestamp
         if args["-d"] is None:
-            args["-d"] = "fh_{}".format(int(datetime.now(timezone.utc).timestamp()))
+            args["-d"] = "corpora/fh_{}".format(int(datetime.now(timezone.utc).timestamp()))
         if args["--forever"]:
             forever(args["-d"])
         else:
