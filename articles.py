@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+!/usr/bin/env python3
 
 from pathlib import Path
 
@@ -102,7 +102,7 @@ def splitByStartCondition(superlist, predicate):
             sublistStart = current
 
 def readSquatArticles() -> (SquatArticle):
-    SQUAT_PATH = "squat.txt"
+    SQUAT_PATH = "corpora/squat.txt"
     with (Path(__file__).parent / SQUAT_PATH).open('r') as f:
         lines = [ s.strip() for s in f.readlines() ]
     for article in splitByStartCondition(lines, lambda line: line.startswith("BY ")):
@@ -113,7 +113,7 @@ def readSquatArticles() -> (SquatArticle):
         yield SquatArticle(body, author)
 
 def readFHArticles() -> (FHArticle):
-    for f in Path(__file__).parent.glob("fh_*/*/*.txt"):
+    for f in Path(__file__).parent.glob("corpora/fh_*/*/*.txt"):
         yield FHArticle.load(f)
 
 squat = list(readSquatArticles())
