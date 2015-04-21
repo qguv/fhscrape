@@ -17,6 +17,9 @@ class Article:
         else:
             self.datetime = datetime.strptime(date.strip() + time.strip(), "%B %d, %Y%I:%M %p") 
 
+    def content(self):
+        return self.body.replace('\n', ' ') # doesn't mutate
+
     def __repr__(self):
         return "<Article: _{}_>".format(self.title)
 
