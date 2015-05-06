@@ -20,6 +20,9 @@ class Article:
     def content(self):
         return self.body.replace('\n', ' ') # doesn't mutate
 
+    def __len__(self):
+        return len(self.content().split(' '))
+
     def __repr__(self):
         return "<Article: _{}_>".format(self.title)
 
